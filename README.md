@@ -197,7 +197,7 @@ results = list(establishments.find(query, {"BusinessName": 1, "RatingValue": 1, 
 for result in results:
     print(result)  
 
- {'_id': ObjectId('66a478ffebb4046f8d7d1e35'), 'BusinessName': 'Volunteer', 'RatingValue': 5, 'scores': {'Hygiene': 0}}
+{'_id': ObjectId('66a478ffebb4046f8d7d1e35'), 'BusinessName': 'Volunteer', 'RatingValue': 5, 'scores': {'Hygiene': 0}}
 {'_id': ObjectId('66a478ffebb4046f8d7d1e53'), 'BusinessName': 'Plumstead Manor Nursery', 'RatingValue': 5, 'scores': {'Hygiene': 0}}
 {'_id': ObjectId('66a478ffebb4046f8d7d1e54'), 'BusinessName': 'Atlantic Fish Bar', 'RatingValue': 5, 'scores': {'Hygiene': 0}}
 {'_id': ObjectId('66a478ffebb4046f8d7d1e0f'), 'BusinessName': 'Iceland', 'RatingValue': 5, 'scores': {'Hygiene': 0}}
@@ -236,6 +236,10 @@ print("Number of documents in the result:", len(results))
 # Print the first 10 results
 pprint(results[0:10])   
 
+
+ Hint: You will need to use the aggregation method to answer this.
+
+    The first 5 rows of your resulting DataFrame should look something like this:  
 Number of documents in the result: 55
 [{'_id': 'Thanet', 'count': 1130},
  {'_id': 'Greenwich', 'count': 882},
