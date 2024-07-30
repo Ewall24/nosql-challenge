@@ -281,10 +281,21 @@ pprint(results[0])
 Which establishments have a hygiene score equal to 20?
 
     # Convert the result to a Pandas DataFrame
-result_df = pd.DataFrame(results)
+result_df = pd.DataFrame(results) 
+result_df['HygieneScore'] = result_df['scores'].apply(lambda x: x['Hygiene'])
+result_df.drop(columns=['scores'], inplace=True)
+result_df 
 
 # Display the number of rows in the DataFrame
-print("Rows in DataFrame: ", len(result_df))
+print("Rows in DataFrame: ", len(result_df))  
+
+	_id	BusinessName	RatingValue	HygieneScore
+0	66a478ffebb4046f8d7d1e35	Volunteer	5	0
+1	66a478ffebb4046f8d7d1e53	Plumstead Manor Nursery	5	0
+2	66a478ffebb4046f8d7d1e54	Atlantic Fish Bar	5	0
+3	66a478ffebb4046f8d7d1e0f	Iceland	5	0
+4	66a478ffebb4046f8d7d1e1e	Howe and Co Fish and Chips - Van 17	5	0
+
 
 # Display the first 10 rows of the DataFrame
 result_df['HygieneScore'] = result_df['scores'].apply(lambda x: x['Hygiene'])
