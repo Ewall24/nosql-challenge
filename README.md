@@ -71,14 +71,177 @@ The magazine editors have some requested modifications for the database before y
     }
 
     Find the BusinessTypeID for "Restaurant/Cafe/Canteen" and return only the BusinessTypeID and BusinessType fields.
+	# Create a dictionary for the new restaurant data
+new_restaurant ={
+    "BusinessName":"Penang Flavours",
+    "BusinessType":"Restaurant/Cafe/Canteen",
+    "BusinessTypeID":"",
+    "AddressLine1":"Penang Flavours",
+    "AddressLine2":"146A Plumstead Rd",
+    "AddressLine3":"London",
+    "AddressLine4":"",
+    "PostCode":"SE18 7DY",
+    "Phone":"",
+    "LocalAuthorityCode":"511",
+    "LocalAuthorityName":"Greenwich",
+    "LocalAuthorityWebSite":"http://www.royalgreenwich.gov.uk",
+    "LocalAuthorityEmailAddress":"health@royalgreenwich.gov.uk",
+    "scores":{
+        "Hygiene":"",
+        "Structural":"",
+        "ConfidenceInManagement":""
+    },
+    "SchemeType":"FHRS",
+    "geocode":{
+        "longitude":"0.08384000",
+        "latitude":"51.49014200"
+    },
+    "RightToReply":"",
+    "Distance":4623.9723280747176,
+    "NewRatingPending":True
+}
+    
 
-    Update the new restaurant with the BusinessTypeID you found.
+    Update the new restaurant with the BusinessTypeID you found. 
+
+# Insert the new restaurant into the collection
+establishments.insert_one(new_restaurant)   
+
+   InsertOneResult(ObjectId('66a47d7a9f68a68f51f3dacd'), acknowledged=True)
+
+
+# Check that the new restaurant was inserted
+query = {"BusinessName": "Penang Flavours"}
+results = establishments.find(query)
+for result in results:
+    pprint(result)  
+
+{'AddressLine1': 'Penang Flavours',
+ 'AddressLine2': '146A Plumstead Rd',
+ 'AddressLine3': 'London',
+ 'AddressLine4': '',
+ 'BusinessName': 'Penang Flavours',
+ 'BusinessType': 'Restaurant/Cafe/Canteen',
+ 'BusinessTypeID': '',
+ 'Distance': 4623.972328074718,
+ 'LocalAuthorityCode': '511',
+ 'LocalAuthorityEmailAddress': 'health@royalgreenwich.gov.uk',
+ 'LocalAuthorityName': 'Greenwich',
+ 'LocalAuthorityWebSite': 'http://www.royalgreenwich.gov.uk',
+ 'NewRatingPending': True,
+ 'Phone': '',
+ 'PostCode': 'SE18 7DY',
+ 'RightToReply': '',
+ 'SchemeType': 'FHRS',
+ '_id': ObjectId('66a47d7a9f68a68f51f3dacd'),
+ 'geocode': {'latitude': '51.49014200', 'longitude': '0.08384000'},
+ 'scores': {'ConfidenceInManagement': '', 'Hygiene': '', 'Structural': ''}}
+    
+    
 
     The magazine is not interested in any establishments in Dover, so check how many documents contain the Dover Local Authority. Then, remove any establishments within the Dover Local Authority from the database, and check the number of documents to ensure they were deleted.
 
+	# Find how many documents have LocalAuthorityName as "Dover"
+count = establishments.count_documents({"LocalAuthorityName": 'Dover'})
+print(f"Number of documents that have LocalAuthorityName 'Dover': {count}") 
+
+
+	Number of documents that have LocalAuthorityName 'Dover': 994
+# Delete all documents where LocalAuthorityName is "Dover"
+query = {"LocalAuthorityName": "Dover"}
+results = establishments.delete_many(query)   
+
+# Check if any remaining documents include Dover
+query = {"LocalAuthorityName": "Dover"}
+count = establishments.count_documents(query)
+if count > 0:
+    results = establishments.find(query)
+    for result in results:
+        print(result)
+else:
+    print("No documents found for LocalAuthorityName 'Dover'")
+
+No documents found for LocalAuthorityName 'Dover' 
+
+# Check that other documents remain with 'find_one'
+query = {"LocalAuthorityName": {"$ne": "Dover"}} # Query all LocalAuthorityName not equal to "Dover"
+fields = {"BusinessName": 1, "LocalAuthorityName": 1, "_id": 0}
+result = establishments.find_one(query, fields)
+pprint(result)   
+
+{'BusinessName': 'The Pavilion', 'LocalAuthorityName': 'Folkestone and Hythe'}  
+
+
+   
+    
     Some of the number values are stored as strings, when they should be stored as numbers.
-        Use update_many to convert latitude and longitude to decimal numbers.
+	Use update_many to convert latitude and longitude to decimal numbers.
+# Change the data type from String to Decimal for longitude and latitude
+establishments.update_many({}, [
+    {"$set": {
+        "geocode.latitude": {"$toDouble": "$geocode.latitude"},
+        "geocode.longitude": {"$toDouble": "$geocode.longitude"} 
+    }}
+])
+
+UpdateResult({'n': 38786, 'nModified': 38786, 'ok': 1.0, 'updatedExisting': True}, acknowledged=True) 
+
+
+ 
         Use update_many to convert RatingValue to integer numbers.
+# Set non 1-5 Rating Values to Null
+non_ratings = ["AwaitingInspection", "Awaiting Inspection", "AwaitingPublication", "Pass", "Exempt"]
+establishments.update_many({"RatingValue": {"$in": non_ratings}}, [ {'$set':{ "RatingValue" : None}} ])   
+
+UpdateResult({'n': 4091, 'nModified': 4091, 'ok': 1.0, 'updatedExisting': True}, acknowledged=True) 
+
+# Change the data type from String to Integer for RatingValue
+establishments.update_many({}, [
+    {"$set": {
+        "RatingValue": {"$toInt": "$RatingValue"}
+    }}
+]) 
+
+	UpdateResult({'n': 38786, 'nModified': 34695, 'ok': 1.0, 'updatedExisting': True}, acknowledged=True) 
+ 
+# Check that the coordinates and rating value are now numbers
+sample_document = establishments.find_one()
+# Loop through the fields in the sample document to check their data types
+for field, value in sample_document.items():
+    data_type = type(value).__name__
+    print(f"{field}: {data_type}")   
+
+	id: ObjectId
+FHRSID: int
+ChangesByServerID: int
+LocalAuthorityBusinessID: str
+BusinessName: str
+BusinessType: str
+BusinessTypeID: int
+AddressLine1: str
+AddressLine2: str
+AddressLine3: str
+AddressLine4: str
+PostCode: str
+Phone: str
+RatingValue: int
+RatingKey: str
+RatingDate: str
+LocalAuthorityCode: str
+LocalAuthorityName: str
+LocalAuthorityWebSite: str
+LocalAuthorityEmailAddress: str
+scores: dict
+SchemeType: str
+geocode: dict
+RightToReply: str
+Distance: float
+NewRatingPending: bool
+meta: dict
+links: list
+    
+
+ 
 
 Part 3: Exploratory Analysis
 
