@@ -276,9 +276,11 @@ _id	count
 8	Southend-On-Sea	586
 9	Tendring	542 
 
-     Hint: You will need to use the aggregation method to answer this.
-
-    The first 5 rows of your resulting DataFrame should look something like this:  
+     
+## Collaboration 
+Omid Khan - omidk414@gmail.com - omidk414 
+Gursimran Kaur - kaursimran081999@gmail.com
+    
 
     
 
